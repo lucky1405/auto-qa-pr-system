@@ -1,0 +1,165 @@
+<mxfile host="app.diagrams.net" modified="2026-10-21T11:00:00.000Z" agent="Mozilla/5.0" version="24.0.0" type="device">
+  <diagram id="auto-qa-pr-sentinel-arch" name="Auto-QA PR Sentinel Architecture">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="1050" math="0" shadow="1">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- CONTAINER: External Trigger Layer -->
+        <mxCell id="trigger-group" value="1. Pull Request Ingestion Layer" style="swimlane;whiteSpace=wrap;html=1;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#1e293b;strokeColor=#475569;fontColor=#f8fafc;rounded=1;arcSize=8;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="380" y="30" width="400" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="node-dev-pr" value="&lt;b&gt;Developer Creates GitHub PR&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#94a3b8&quot; style=&quot;font-size: 11px;&quot;&gt;Webhook Trigger / PR Diff &amp;amp; Changed Files&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0f172a;strokeColor=#3b82f6;strokeWidth=2;fontColor=#f8fafc;shadow=0;" vertex="1" parent="trigger-group">
+          <mxGeometry y="26" width="400" height="64" as="geometry"/>
+        </mxCell>
+
+        <!-- CONTAINER: Gateway & Concurrency Queue -->
+        <mxCell id="gateway-group" value="2. Gateway &amp; Scalable Async Task Queue" style="swimlane;whiteSpace=wrap;html=1;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#1e293b;strokeColor=#475569;fontColor=#f8fafc;rounded=1;arcSize=8;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="360" y="160" width="440" height="100" as="geometry"/>
+        </mxCell>
+        <mxCell id="node-gateway" value="&lt;b&gt;FastAPI Gateway &amp;amp; Scalable Worker Pool&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#94a3b8&quot; style=&quot;font-size: 11px;&quot;&gt;• Async Task Queue (Non-blocking Ingestion)&lt;br&gt;• Pub/Sub Real-time WebSocket Event Stream&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1e1b4b;strokeColor=#6366f1;strokeWidth=2;fontColor=#f8fafc;shadow=0;" vertex="1" parent="gateway-group">
+          <mxGeometry y="26" width="440" height="74" as="geometry"/>
+        </mxCell>
+
+        <!-- Edge 1 to 2 -->
+        <mxCell id="edge-1-2" value="HTTP POST / Webhook" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#60a5fa;strokeWidth=2;fontColor=#94a3b8;fontSize=10;fontStyle=1;" edge="1" parent="1" source="node-dev-pr" target="node-gateway">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Orchestrator Box -->
+        <mxCell id="node-orchestrator" value="&lt;b style=&quot;font-size: 14px;&quot;&gt;🎯 Multi-Agent Swarm Orchestrator&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#cbd5e1&quot; style=&quot;font-size: 11px;&quot;&gt;Coordinates Workflow • Manages State Machine • Executes Parallel Fan-Out&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1d4ed8;strokeColor=#93c5fd;strokeWidth=2;fontColor=#ffffff;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="380" y="300" width="400" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- Edge 2 to 3 -->
+        <mxCell id="edge-2-3" value="Dispatch Task to Orchestrator" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#818cf8;strokeWidth=2;fontColor=#94a3b8;fontSize=10;" edge="1" parent="1" source="node-gateway" target="node-orchestrator">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- CONTAINER: Parallel Review Agents Swarm -->
+        <mxCell id="agents-group" value="3. Specialized Review Agents Swarm (Parallel Fan-Out via asyncio.gather)" style="swimlane;whiteSpace=wrap;html=1;fontStyle=1;align=center;verticalAlign=top;startSize=26;fillColor=#0f172a;strokeColor=#334155;fontColor=#f8fafc;rounded=1;arcSize=6;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="400" width="1040" height="150" as="geometry"/>
+        </mxCell>
+
+        <!-- Agent 1: Quality -->
+        <mxCell id="agent-quality" value="&lt;b style=&quot;font-size: 13px;&quot;&gt;🧹 Code Quality Sentinel&lt;/b&gt;&lt;hr style=&quot;border-color: #334155;&quot;&gt;&lt;div style=&quot;text-align: left; font-size: 11px; padding: 2px;&quot;&gt;• PEP8 &amp;amp; Type Annotations&lt;br&gt;• Unmanaged File/Socket Leaks&lt;br&gt;• McCabe Cyclomatic Complexity &amp;gt; 10&lt;br&gt;• Docstrings &amp;amp; Code Smells&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#064e3b;strokeColor=#10b981;strokeWidth=2;fontColor=#ecfdf5;shadow=0;" vertex="1" parent="agents-group">
+          <mxGeometry x="30" y="38" width="290" height="96" as="geometry"/>
+        </mxCell>
+
+        <!-- Agent 2: Security -->
+        <mxCell id="agent-security" value="&lt;b style=&quot;font-size: 13px;&quot;&gt;🛡️ Security Sentinel&lt;/b&gt;&lt;hr style=&quot;border-color: #334155;&quot;&gt;&lt;div style=&quot;text-align: left; font-size: 11px; padding: 2px;&quot;&gt;• CWE-89: SQL Injection (f-strings)&lt;br&gt;• CWE-78: OS Command Injection&lt;br&gt;• CWE-798: Hardcoded Secrets/Keys&lt;br&gt;• CVSS 3.1 Severity Scoring&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4c0519;strokeColor=#f43f5e;strokeWidth=2;fontColor=#fff1f2;shadow=0;" vertex="1" parent="agents-group">
+          <mxGeometry x="375" y="38" width="290" height="96" as="geometry"/>
+        </mxCell>
+
+        <!-- Agent 3: Testing -->
+        <mxCell id="agent-test" value="&lt;b style=&quot;font-size: 13px;&quot;&gt;🧪 Test Coverage Sentinel&lt;/b&gt;&lt;hr style=&quot;border-color: #334155;&quot;&gt;&lt;div style=&quot;text-align: left; font-size: 11px; padding: 2px;&quot;&gt;• Boundary Off-By-One (&amp;lt; vs &amp;lt;=)&lt;br&gt;• Missing Negative Input Checks&lt;br&gt;• Assertion Coverage Gaps&lt;br&gt;• Parameterized Test Synthesis&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#3b0764;strokeColor=#a855f7;strokeWidth=2;fontColor=#faf5ff;shadow=0;" vertex="1" parent="agents-group">
+          <mxGeometry x="720" y="38" width="290" height="96" as="geometry"/>
+        </mxCell>
+
+        <!-- Fan out edges from Orchestrator -->
+        <mxCell id="edge-orch-qual" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#10b981;strokeWidth=2;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="node-orchestrator" target="agent-quality">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge-orch-sec" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#f43f5e;strokeWidth=2;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="node-orchestrator" target="agent-security">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge-orch-test" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#a855f7;strokeWidth=2;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="node-orchestrator" target="agent-test">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- RAG Engine and Knowledge Base -->
+        <mxCell id="node-rag" value="&lt;b style=&quot;font-size: 13px;&quot;&gt;🧠 Hybrid RAG Engine&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#cbd5e1&quot; style=&quot;font-size: 11px;&quot;&gt;• BM25 Lexical Keyword Search&lt;br&gt;• Cosine Vector Similarity Ranking&lt;br&gt;• Grounding Metrics: Relevance &amp;amp; Faithfulness&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#713f12;strokeColor=#eab308;strokeWidth=2;fontColor=#fefce8;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="240" y="590" width="330" height="80" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="node-kb" value="&lt;b style=&quot;font-size: 13px;&quot;&gt;📚 Project Knowledge Base&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#cbd5e1&quot; style=&quot;font-size: 11px;&quot;&gt;• SQL Injection Prevention Rules&lt;br&gt;• Context Manager Guidelines&lt;br&gt;• Historical Bug Fix Patterns (APR)&lt;/font&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=12;fillColor=#1e293b;strokeColor=#f59e0b;strokeWidth=2;fontColor=#fef08a;" vertex="1" parent="1">
+          <mxGeometry x="640" y="580" width="280" height="95" as="geometry"/>
+        </mxCell>
+
+        <!-- Connect KB to RAG -->
+        <mxCell id="edge-kb-rag" value="Indexes Rules" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#f59e0b;strokeWidth=2;dashed=1;fontColor=#fde047;fontSize=10;" edge="1" parent="1" source="node-kb" target="node-rag">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Edge from Agents to RAG -->
+        <mxCell id="edge-agents-rag" value="Consolidated Defect Diagnostics" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#eab308;strokeWidth=2;fontColor=#fef08a;fontSize=10;fontStyle=1;" edge="1" parent="1" source="agent-security" target="node-rag">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Fix Agent -->
+        <mxCell id="node-fix-agent" value="&lt;b style=&quot;font-size: 13px;&quot;&gt;🔧 Automated Fix Agent (APR)&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#cbd5e1&quot; style=&quot;font-size: 11px;&quot;&gt;Synthesizes Unified Diff Patch based on Diagnostics, RAG Guidelines &amp;amp; Feedback&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0c4a6e;strokeColor=#0284c7;strokeWidth=2;fontColor=#f0f9ff;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="380" y="710" width="400" height="65" as="geometry"/>
+        </mxCell>
+
+        <!-- Edge RAG to Fix Agent -->
+        <mxCell id="edge-rag-fix" value="Grounded Fix Patterns" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#38bdf8;strokeWidth=2;fontColor=#93c5fd;fontSize=10;" edge="1" parent="1" source="node-rag" target="node-fix-agent">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Sandbox Runner -->
+        <mxCell id="node-sandbox" value="&lt;b style=&quot;font-size: 14px;&quot;&gt;🐳 Zero-Trust Verification Sandbox&lt;/b&gt;&lt;hr style=&quot;border-color: #334155;&quot;&gt;&lt;div style=&quot;text-align: left; font-size: 11px; padding: 2px;&quot;&gt;• &lt;b&gt;Isolated Tempjail / Docker Container&lt;/b&gt; (Resource Limits &amp;amp; Timeouts)&lt;br&gt;• Executes &lt;b&gt;Pytest Unit Suites&lt;/b&gt; (Passing / Failing assertions)&lt;br&gt;• AST-level &lt;b&gt;Security &amp;amp; Linter Checks&lt;/b&gt; (No raw string injections)&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1e293b;strokeColor=#f43f5e;strokeWidth=2;fontColor=#f8fafc;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="360" y="815" width="440" height="85" as="geometry"/>
+        </mxCell>
+
+        <!-- Edge Fix Agent to Sandbox -->
+        <mxCell id="edge-fix-sand" value="Candidate Patch Proposal" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0284c7;strokeWidth=2;fontColor=#bae6fd;fontSize=10;fontStyle=1;" edge="1" parent="1" source="node-fix-agent" target="node-sandbox">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Retry Loop Box (Left side of Sandbox and Fix Agent) -->
+        <mxCell id="node-retry" value="&lt;b style=&quot;color: #f43f5e;&quot;&gt;Iterative Retry Loop&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#cbd5e1&quot; style=&quot;font-size: 10px;&quot;&gt;Feedback: stderr, traceback&lt;br&gt;Max Attempts: 3&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#450a0a;strokeColor=#f43f5e;strokeWidth=2;dashed=1;fontColor=#fecdd3;" vertex="1" parent="1">
+          <mxGeometry x="120" y="750" width="180" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- Edge Sandbox to Retry -->
+        <mxCell id="edge-sand-fail" value="Tests / Linter Fail" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#f43f5e;strokeWidth=2;fontColor=#fca5a5;fontSize=10;fontStyle=1;" edge="1" parent="1" source="node-sandbox" target="node-retry">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="210" y="857"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Edge Retry to Fix Agent -->
+        <mxCell id="edge-retry-fix" value="Traceback Feedback" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#f43f5e;strokeWidth=2;fontColor=#fca5a5;fontSize=10;" edge="1" parent="1" source="node-retry" target="node-fix-agent">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="210" y="742"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- OUTPUT: Verified Commit -->
+        <mxCell id="node-commit" value="&lt;b style=&quot;font-size: 13px;&quot;&gt;✅ Verified PR Commit&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#d1fae5&quot; style=&quot;font-size: 11px;&quot;&gt;Generated Commit Hash (e.g. 9f4a1c7e)&lt;br&gt;Automated PR Approval &amp;amp; Review Verdict&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#065f46;strokeColor=#10b981;strokeWidth=2;fontColor=#ecfdf5;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="200" y="940" width="340" height="70" as="geometry"/>
+        </mxCell>
+
+        <!-- Edge Sandbox to Commit (Pass) -->
+        <mxCell id="edge-sand-pass" value="Sandbox Verification PASSED" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#10b981;strokeWidth=2;fontColor=#6ee7b7;fontSize=10;fontStyle=1;" edge="1" parent="1" source="node-sandbox" target="node-commit">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="450" y="915"/>
+              <mxPoint x="370" y="915"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- OUTPUT: Metrics Engine -->
+        <mxCell id="node-metrics" value="&lt;b style=&quot;font-size: 13px;&quot;&gt;📊 Quality &amp;amp; Reliability Telemetry&lt;/b&gt;&lt;hr style=&quot;border-color: #334155;&quot;&gt;&lt;div style=&quot;text-align: left; font-size: 10px; padding: 2px;&quot;&gt;• &lt;b&gt;SRI (Software Reliability Index)&lt;/b&gt;: 98.5 / 100&lt;br&gt;• &lt;b&gt;Projected MTBF&lt;/b&gt;: 25,000+ hours (1/&amp;lambda;)&lt;br&gt;• &lt;b&gt;Defect Detection Rate&lt;/b&gt;: 100% | &lt;b&gt;FPR&lt;/b&gt;: 0.0%&lt;br&gt;• &lt;b&gt;Maintainability Index (MI)&lt;/b&gt;: 89.2 (SEI)&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#134e4a;strokeColor=#14b8a6;strokeWidth=2;fontColor=#f0fdfa;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="600" y="930" width="370" height="90" as="geometry"/>
+        </mxCell>
+
+        <!-- Edge Sandbox to Metrics -->
+        <mxCell id="edge-sand-metrics" value="Compute Quality Report" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#14b8a6;strokeWidth=2;fontColor=#5eead4;fontSize=10;" edge="1" parent="1" source="node-sandbox" target="node-metrics">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="710" y="915"/>
+              <mxPoint x="785" y="915"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
