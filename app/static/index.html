@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auto-QA PR Sentinel | Multi-Agent AI Software Quality Team</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="nav-container">
+      <div class="logo-area">
+        <div class="logo-icon">🛡️</div>
+        <div class="logo-text">
+          <h1>Auto-QA PR Sentinel</h1>
+          <p>Autonomous Multi-Agent AI &amp; Sandbox Quality Swarm for GitHub PRs</p>
+        </div>
+      </div>
+
+      <nav class="nav-tabs">
+        <button class="tab-btn active" data-tab="tab-swarm">🚀 Swarm Pipeline</button>
+        <button class="tab-btn" data-tab="tab-metrics">📊 Quality &amp; Reliability</button>
+        <button class="tab-btn" data-tab="tab-benchmark">🧪 Batch Benchmark</button>
+        <button class="tab-btn" data-tab="tab-rag">📚 RAG Knowledge Base</button>
+      </nav>
+
+      <div class="status-pill">
+        <div class="pulse-dot"></div>
+        <span id="system-status-text">System Active • 4 Workers</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- TAB 1: SWARM PIPELINE -->
+    <section id="tab-swarm" class="tab-pane active">
+      <!-- Scenario Selector -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span>📂</span> Select PR Scenario or Provide Custom Code</div>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">Real-world defects &amp; baseline scenarios</span>
+        </div>
+        <div class="scenario-selector" id="scenario-selector-container">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+
+      <!-- Pipeline Visualizer -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span>⚡</span> Live Orchestration Pipeline</div>
+          <div id="pipeline-status-badge" style="font-size: 0.78rem; font-weight: 600; color: #38bdf8;">Idle</div>
+        </div>
+        <div class="pipeline-visualizer">
+          <div class="pipeline-node" id="node-ingest">
+            <div class="node-icon">📥</div>
+            <div class="node-title">1. Ingestion</div>
+            <div class="node-sub">PR Diff &amp; Files</div>
+          </div>
+          <div class="pipeline-connector">➔</div>
+          <div class="pipeline-node" id="node-fanout">
+            <div class="node-icon">👥</div>
+            <div class="node-title">2. Agent Fan-Out</div>
+            <div class="node-sub">Quality • Security • Test</div>
+          </div>
+          <div class="pipeline-connector">➔</div>
+          <div class="pipeline-node" id="node-rag">
+            <div class="node-icon">🧠</div>
+            <div class="node-title">3. RAG Engine</div>
+            <div class="node-sub">Conventions &amp; Rules</div>
+          </div>
+          <div class="pipeline-connector">➔</div>
+          <div class="pipeline-node" id="node-fix">
+            <div class="node-icon">🔧</div>
+            <div class="node-title">4. Fix Agent</div>
+            <div class="node-sub">Patch Synthesis</div>
+          </div>
+          <div class="pipeline-connector">➔</div>
+          <div class="pipeline-node" id="node-sandbox">
+            <div class="node-icon">🐳</div>
+            <div class="node-title">5. Sandbox &amp; Retry</div>
+            <div class="node-sub">Isolated Execution</div>
+          </div>
+          <div class="pipeline-connector">➔</div>
+          <div class="pipeline-node" id="node-verdict">
+            <div class="node-icon">✅</div>
+            <div class="node-title">6. Verified PR</div>
+            <div class="node-sub">Commit &amp; Merge Gate</div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem; align-items: center; justify-content: flex-end;">
+          <button id="btn-run-swarm" class="btn-primary">
+            <span>⚡ Run Autonomous QA Swarm</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Code & Diff Split View -->
+      <div class="grid-2">
+        <!-- Input Code -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span>📝</span> Pull Request Code (<span id="current-filename">module.py</span>)</div>
+            <span id="pr-meta-author" style="font-size: 0.75rem; color: var(--text-muted);">Author: dev</span>
+          </div>
+          <textarea id="input-code" class="code-editor" spellcheck="false"></textarea>
+          
+          <div style="margin-top: 0.75rem;">
+            <div style="font-size: 0.78rem; font-weight: 600; margin-bottom: 0.35rem; color: var(--text-muted);">Companion Unit Test Suite</div>
+            <textarea id="input-test-code" class="code-editor" style="height: 140px;" spellcheck="false"></textarea>
+          </div>
+        </div>
+
+        <!-- Patched Code & Diff -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span>🔍</span> Verified Patch &amp; Diff</div>
+            <div id="verified-commit-pill" style="display:none; font-size:0.75rem; background:rgba(16,185,129,0.2); color:#6ee7b7; padding:0.25rem 0.6rem; border-radius:12px; font-family:var(--font-mono);">
+              Commit: <span id="commit-hash-val">sha</span>
+            </div>
+          </div>
+          <div id="diff-output" class="code-container" style="height: 420px;">
+            <span style="color: var(--text-muted);">No analysis performed yet. Select a scenario and click 'Run Autonomous QA Swarm'.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Execution Log & Detected Defects -->
+      <div class="grid-2">
+        <!-- Live Terminal -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span>💻</span> Sandbox &amp; Pipeline Execution Telemetry</div>
+            <button id="btn-clear-terminal" class="btn-secondary" style="padding: 0.2rem 0.6rem; font-size: 0.7rem;">Clear</button>
+          </div>
+          <div id="terminal-logs" class="terminal">
+            <div class="log-entry">
+              <span class="log-time">[0.00s]</span>
+              <span class="log-stage">[SYSTEM]</span>
+              <span class="log-msg">Auto-QA PR Sentinel initialized and ready for review queue.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Defects & RAG Rules Applied -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span>⚠️</span> Issues Detected &amp; Grounded Fix Rationale</div>
+            <span id="issue-count-badge" style="font-size: 0.75rem; color: var(--text-muted);">0 issues</span>
+          </div>
+          <div id="issues-list" style="max-height: 220px; overflow-y: auto;">
+            <div style="font-size: 0.8rem; color: var(--text-muted); padding: 1rem 0;">Awaiting pipeline run...</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: QUALITY & RELIABILITY METRICS -->
+    <section id="tab-metrics" class="tab-pane">
+      <!-- Executive Scorecard -->
+      <div class="card" style="background: linear-gradient(135deg, rgba(18,24,38,0.9), rgba(30,41,65,0.9));">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <div style="font-size: 0.8rem; text-transform: uppercase; color: #93c5fd; letter-spacing: 0.05em; font-weight: 600;">Overall Software Quality Scorecard</div>
+            <h2 id="metrics-pr-title" style="font-size: 1.4rem; font-weight: 700; margin: 0.2rem 0;">PR Quality &amp; Reliability Assessment</h2>
+            <p id="metrics-grade-expl" style="font-size: 0.85rem; color: var(--text-muted);">Comprehensive evaluation incorporating IEEE reliability, McCabe complexity, and SEI maintainability.</p>
+          </div>
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <div id="grade-badge" class="grade-badge grade-A">A+</div>
+            <div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">Quality Grade</div>
+              <div id="grade-label" style="font-size: 1rem; font-weight: 700; color: #34d399;">Production Ready</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- KPI Grid -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-label">Defect Detection Rate</div>
+          <div id="metric-ddr" class="metric-value">100%</div>
+          <div class="metric-sub">Sensitivity (Recall)</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">False Positive Rate</div>
+          <div id="metric-fpr" class="metric-value">0.0%</div>
+          <div class="metric-sub">Target: &lt; 5%</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Auto-Fix Success Rate</div>
+          <div id="metric-fix-rate" class="metric-value">100%</div>
+          <div class="metric-sub">Sandbox Verified</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Software Reliability Index</div>
+          <div id="metric-sri" class="metric-value">98.5</div>
+          <div class="metric-sub">0-100 Scale</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Projected MTBF</div>
+          <div id="metric-mtbf" class="metric-value">25,000h</div>
+          <div class="metric-sub">Mean Time Between Failures</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Defect Density</div>
+          <div id="metric-density" class="metric-value">0.0</div>
+          <div class="metric-sub">Defects / KLOC</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Maintainability Index</div>
+          <div id="metric-mi" class="metric-value">88.4</div>
+          <div class="metric-sub">SEI Standard (&gt;85 High)</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Mean Time to Repair</div>
+          <div id="metric-mttr" class="metric-value">340ms</div>
+          <div class="metric-sub">Feedback Latency</div>
+        </div>
+      </div>
+
+      <!-- Visual Charts & Radar -->
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span>📈</span> Quality Dimensions Radar</div>
+          </div>
+          <div style="height: 280px; position: relative;">
+            <canvas id="qualityRadarChart"></canvas>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span>📉</span> Pre-Patch vs. Post-Patch Complexity</div>
+          </div>
+          <div style="height: 280px; position: relative;">
+            <canvas id="complexityBarChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Formulas & IEEE Standards Reference -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span>📐</span> Software Quality &amp; Reliability Mathematical Foundations</div>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">IEEE &amp; SEI Standards</span>
+        </div>
+        <div id="formulas-container">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: BATCH BENCHMARK -->
+    <section id="tab-benchmark" class="tab-pane">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title"><span>🧪</span> Autonomous Evaluation Benchmark Suite</div>
+            <p style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.2rem;">
+              Executes the full multi-agent swarm against a standard suite of Security, Reliability, Boundary, and Clean PR test cases.
+            </p>
+          </div>
+          <button id="btn-run-benchmark" class="btn-primary">
+            <span>▶ Run Benchmark Suite</span>
+          </button>
+        </div>
+
+        <div id="benchmark-summary-box" style="display:none; margin-bottom: 1.25rem;">
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <div class="metric-label">Scenarios Evaluated</div>
+              <div id="bench-count" class="metric-value">4</div>
+              <div class="metric-sub">100% Completed</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">Defect Detection Rate</div>
+              <div id="bench-ddr" class="metric-value">100%</div>
+              <div class="metric-sub">Zero False Negatives</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">False Positive Rate</div>
+              <div id="bench-fpr" class="metric-value">0.0%</div>
+              <div class="metric-sub">Clean PR Preserved</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">Auto-Fix Success Rate</div>
+              <div id="bench-fix-rate" class="metric-value">100%</div>
+              <div class="metric-sub">Sandbox Verified</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">Mean Reliability Index</div>
+              <div id="bench-sri" class="metric-value">94.2</div>
+              <div class="metric-sub">Across All PRs</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">Mean Latency</div>
+              <div id="bench-latency" class="metric-value">420ms</div>
+              <div class="metric-sub">Total Duration</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="benchmark-table-container">
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.82rem; text-align: left;">
+            <thead>
+              <tr style="border-bottom: 1px solid var(--border-color); color: var(--text-muted);">
+                <th style="padding: 0.75rem;">Scenario</th>
+                <th style="padding: 0.75rem;">Category</th>
+                <th style="padding: 0.75rem;">Verdict</th>
+                <th style="padding: 0.75rem;">Defects Fixed</th>
+                <th style="padding: 0.75rem;">Reliability (SRI)</th>
+                <th style="padding: 0.75rem;">Maintainability</th>
+                <th style="padding: 0.75rem;">Latency</th>
+              </tr>
+            </thead>
+            <tbody id="benchmark-tbody">
+              <tr>
+                <td colspan="7" style="padding: 1.5rem; text-align: center; color: var(--text-muted);">
+                  Click 'Run Benchmark Suite' to execute end-to-end multi-agent evaluation.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: RAG KNOWLEDGE BASE -->
+    <section id="tab-rag" class="tab-pane">
+      <div class="grid-2">
+        <!-- Live Semantic Search -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span>🔍</span> Query RAG Semantic Index</div>
+          </div>
+          <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+            <input id="rag-query-input" type="text" placeholder="e.g. How should SQL queries be formatted to prevent injection?" style="flex:1; background:#0d121d; border:1px solid var(--border-color); color:#fff; border-radius:6px; padding:0.6rem 0.85rem; font-size:0.82rem; outline:none;" value="SQL injection parameterized query prevention">
+            <button id="btn-search-rag" class="btn-primary" style="padding: 0.5rem 1rem;">Search</button>
+          </div>
+          <div id="rag-search-results" style="max-height: 480px; overflow-y: auto;">
+            <div style="color: var(--text-muted); font-size: 0.8rem;">Enter a query above or inspect indexed policies on the right.</div>
+          </div>
+        </div>
+
+        <!-- Indexed Knowledge Documents -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span>📚</span> Indexed Project Conventions &amp; Rules</div>
+            <span id="rag-doc-count" style="font-size: 0.75rem; color: var(--text-muted);">5 documents</span>
+          </div>
+          <div id="rag-documents-container" style="max-height: 520px; overflow-y: auto;">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
